@@ -1,9 +1,3 @@
-"""
-validacao.py
-------------
-Funcoes de validacao usadas em todo o sistema.
-Mesmo estilo do arquivo original: funcoes simples com re.
-"""
 
 import re
 import hashlib

@@ -1,9 +1,3 @@
-"""
-funcoes_parques.py
-------------------
-CRUD de parques eolicos. Cada parque pertence a um cliente (email_cliente).
-Estatisticas feitas com Pandas.
-"""
 
 import pandas as pd
 import database as db

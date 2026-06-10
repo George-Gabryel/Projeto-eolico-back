@@ -1,8 +1,4 @@
-"""
-funcoes_turbinas.py
--------------------
-CRUD de turbinas. Cada turbina pertence a um parque (id_parque).
-"""
+
 
 import pandas as pd
 import database as db

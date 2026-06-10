@@ -1,9 +1,3 @@
-"""
-funcoes_relatorios.py
----------------------
-CRUD de relatorios / dashboards. Cada relatorio esta ligado a um parque.
-O cliente so enxerga relatorios do proprio parque.
-"""
 
 import pandas as pd
 import database as db

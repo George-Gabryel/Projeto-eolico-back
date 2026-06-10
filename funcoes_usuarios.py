@@ -1,9 +1,4 @@
-"""
-funcoes_usuarios.py
--------------------
-CRUD de usuarios. Mesmo estilo simples do projeto original
-(funcoes soltas, loops, try/except), mas salvando no SQLite.
-"""
+
 
 import database as db
 import validacao as validar

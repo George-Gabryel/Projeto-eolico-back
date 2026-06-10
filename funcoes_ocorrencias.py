@@ -1,10 +1,3 @@
-"""
-funcoes_ocorrencias.py
-----------------------
-CRUD de ocorrencias de dispersao de aves.
-Cada ocorrencia esta ligada a um parque (id_parque), para que o cliente
-consiga ver apenas as ocorrencias do proprio parque.
-"""
 
 import pandas as pd
 import database as db
@@ -31,7 +24,7 @@ def registrar_ocorrencia():
 
     id_turbina = input("ID da turbina afetada: ").strip().upper()
     data       = input("Data do evento (ex: 03/06/2026): ").strip()
-    tipo_ave   = input("Tipo de ave: ").    
+    tipo_ave = input("Tipo de ave: ").strip()
 
     while True:
         try:

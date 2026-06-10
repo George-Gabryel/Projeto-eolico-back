@@ -1,8 +1,4 @@
-"""
-funcoes_drones.py
------------------
-CRUD de drones. Cada drone pertence a um parque (id_parque).
-"""
+
 
 import pandas as pd
 import database as db
