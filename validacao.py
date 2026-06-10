@@ -14,17 +14,10 @@ def validar_telefone(telefone):
 
 
 def gerar_hash(senha):
-    """
-    Transforma a senha em um 'hash' (codigo embaralhado).
-    Assim a senha real nunca fica salva no banco.
-    Usa o algoritmo SHA-256 da biblioteca padrao do Python.
-    """
+  
     return hashlib.sha256(senha.encode("utf-8")).hexdigest()
 
 
 def conferir_senha(senha_digitada, hash_salvo):
-    """
-    Compara a senha digitada (gerando o hash dela) com o hash que
-    esta salvo no banco. Retorna True se forem iguais.
-    """
+    
     return gerar_hash(senha_digitada) == hash_salvo
