@@ -1,18 +1,4 @@
-"""
-menu.py  --  ARQUIVO PRINCIPAL DO SISTEMA
-==========================================
-Roda no terminal/CMD. Faz login com e-mail e senha e mostra os menus
-de acordo com o perfil do usuario:
 
-  Gerente     : acesso total ao sistema.
-  Funcionario : acesso a tudo, exceto a Visao Geral Financeira (relatorios
-                de clientes). Pode ver/criar relatorios, mas nao o painel
-                financeiro consolidado de clientes.
-  Cliente     : so visualiza ocorrencias, relatorios e dashboards do
-                PROPRIO parque. Nao cadastra nada.
-
-Para rodar:  python menu.py
-"""
 
 import database as db
 import validacao as validar
