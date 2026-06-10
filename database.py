@@ -2,8 +2,7 @@
 
 from sqlalchemy import create_engine, text
 
-# create_engine cria a "ponte" entre o Python e o arquivo SQLite.
-# O arquivo sistema.db sera criado automaticamente na primeira execucao.
+
 engine = create_engine("sqlite:///sistema.db")
 
 
