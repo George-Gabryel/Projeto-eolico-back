@@ -1,14 +1,25 @@
+"""
+database.py
+-----------
+Camada de banco de dados do sistema eolico.
+Usa SQLAlchemy + SQLite para guardar os dados em um arquivo (sistema.db),
+assim os dados nao se perdem quando o programa fecha.
 
+Mantemos o estilo simples: funcoes soltas, nada de classes complicadas.
+"""
 
 from sqlalchemy import create_engine, text
 
 # create_engine cria a "ponte" entre o Python e o arquivo SQLite.
 # O arquivo sistema.db sera criado automaticamente na primeira execucao.
-engine = create_engine
+engine = create_engine("sqlite:///sistema.db")
 
 
 def executar(sql, parametros=None):
- 
+    """
+    Executa um comando SQL que NAO retorna dados (INSERT, UPDATE, DELETE,
+    CREATE TABLE). Ja faz o commit automaticamente.
+    """
     try:
         with engine.begin() as conexao:
             conexao.execute(text(sql), parametros or {})
@@ -19,7 +30,10 @@ def executar(sql, parametros=None):
 
 
 def consultar(sql, parametros=None):
- 
+    """
+    Executa um SELECT e devolve uma lista de dicionarios.
+    Cada dicionario e uma linha da tabela (coluna: valor).
+    """
     try:
         with engine.connect() as conexao:
             resultado = conexao.execute(text(sql), parametros or {})
@@ -31,7 +45,10 @@ def consultar(sql, parametros=None):
 
 
 def criar_tabelas():
-  
+    """
+    Cria todas as tabelas do sistema (se ainda nao existirem).
+    Chamada uma vez no inicio do programa.
+    """
     # ---- USUARIOS ----
     executar("""
         CREATE TABLE IF NOT EXISTS usuarios (
