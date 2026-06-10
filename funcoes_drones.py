@@ -13,11 +13,11 @@ def cadastrar_drone():
     print("\n--- CADASTRO DE DRONE ---")
 
     while True:
-        did = input("ID do drone (ex: DRONE-001): ").strip().upper()
-        if did == "":
+        id_drone = input("ID do drone (ex: DRONE-001): ").strip().upper()
+        if id_drone == "":
             print("ID nao pode ser vazio.")
             continue
-        if db.consultar("SELECT id FROM drones WHERE id = :i", {"i": did}):
+        if db.consultar("SELECT id FROM drones WHERE id = :i", {"i": id_drone}):
             print("ID ja cadastrado.")
             continue
         break
@@ -49,12 +49,12 @@ def cadastrar_drone():
 
     db.executar("""
         INSERT INTO drones (id, id_parque, nome, bateria_lipo, limite_voo, status)
-        VALUES (:id, :par, :nome, :bat, :lim, 'ativo')
+        VALUES (:id, :par, :nome, :bateria_novo, :lim, 'ativo')
     """, {
-        "id": did, "par": id_parque, "nome": nome,
-        "bat": bateria, "lim": limite
+        "id": id_drone, "par": id_parque, "nome": nome,
+        "bateria_novo": bateria, "lim": limite
     })
-    print(f"\n[OK] Drone '{did} - {nome}' vinculado ao parque '{id_parque}'!")
+    print(f"\n[OK] Drone '{id_drone} - {nome}' vinculado ao parque '{id_parque}'!")
 
 
 # ---------------- READ ----------------
@@ -81,10 +81,10 @@ def estatisticas_drones():
         return
 
     df = pd.DataFrame(drones)
-    ativos    = (df["status"] == "ativo").sum()
-    apos      = (df["status"] == "aposentado").sum()
+    ativos = (df["status"] == "ativo").sum()
+    apossentado = (df["status"] == "aposentado").sum()
     bat_media = df["bateria_lipo"].mean()
-    criticos  = (df["bateria_lipo"] < 20).sum()
+    bat_critico  = (df["bateria_lipo"] < 20).sum()
 
     print(f"\n==================================================")
     print(f"  FROTA - {len(df)} drone(s)")
@@ -92,24 +92,24 @@ def estatisticas_drones():
     print(f"  Ativos          : {ativos}")
     print(f"  Aposentados     : {apos}")
     print(f"  Bateria media   : {bat_media:.1f}%")
-    print(f"  Bateria critica : {criticos} drone(s) abaixo de 20%")
+    print(f"  Bateria critica : {bat_critico} drone(s) abaixo de 20%")
     print(f"==================================================")
 
 
 # ---------------- UPDATE ----------------
 def atualizar_bateria():
-    did = input("ID do drone: ").strip().upper()
-    achou = db.consultar("SELECT bateria_lipo FROM drones WHERE id = :i", {"i": did})
+    id_drone = input("ID do drone: ").strip().upper()
+    achou = db.consultar("SELECT bateria_lipo FROM drones WHERE id = :i", {"i": id_drone})
     if not achou:
         print("Drone nao encontrado.")
         return
     print(f"Bateria atual: {achou[0]['bateria_lipo']}%")
     while True:
         try:
-            bat = int(input("Novo nivel de bateria (0-100): "))
-            if 0 <= bat <= 100:
+            bateria_novo = int(input("Novo nivel de bateria (0-100): "))
+            if 0 <= bateria_novo <= 100:
                 db.executar("UPDATE drones SET bateria_lipo = :b WHERE id = :i",
-                            {"b": bat, "i": did})
+                            {"b": bateria_novo, "i": id_drone})
                 print("[OK] Bateria atualizada!")
                 return
             print("Informe entre 0 e 100.")
@@ -118,8 +118,8 @@ def atualizar_bateria():
 
 
 def alterar_limite_voo():
-    did = input("ID do drone: ").strip().upper()
-    achou = db.consultar("SELECT limite_voo FROM drones WHERE id = :i", {"i": did})
+    id_drone = input("ID do drone: ").strip().upper()
+    achou = db.consultar("SELECT limite_voo FROM drones WHERE id = :i", {"i": id_drone})
     if not achou:
         print("Drone nao encontrado.")
         return
@@ -129,7 +129,7 @@ def alterar_limite_voo():
             novo = int(input("Novo limite (metros): "))
             if novo > 0:
                 db.executar("UPDATE drones SET limite_voo = :l WHERE id = :i",
-                            {"l": novo, "i": did})
+                            {"l": novo, "i": id_drone})
                 print("[OK] Limite atualizado!")
                 return
             print("Deve ser maior que 0.")
@@ -139,8 +139,8 @@ def alterar_limite_voo():
 
 # ---------------- DELETE ----------------
 def aposentar_ou_remover_drone():
-    did = input("ID do drone: ").strip().upper()
-    achou = db.consultar("SELECT * FROM drones WHERE id = :i", {"i": did})
+    id_drone = input("ID do drone: ").strip().upper()
+    achou = db.consultar("SELECT * FROM drones WHERE id = :i", {"i": id_drone})
     if not achou:
         print("Drone nao encontrado.")
         return
@@ -149,23 +149,23 @@ def aposentar_ou_remover_drone():
     print("2 - Remover completamente")
     print("3 - Cancelar")
     try:
-        opc = int(input("Escolha: "))
+        escolha = int(input("Escolha: "))
     except ValueError:
         print("Opcao invalida.")
         return
-    if opc == 1:
-        db.executar("UPDATE drones SET status = 'aposentado' WHERE id = :i", {"i": did})
+    if escolha == 1:
+        db.executar("UPDATE drones SET status = 'aposentado' WHERE id = :i", {"i": id_drone})
         print("[OK] Drone aposentado.")
-    elif opc == 2:
+    elif escolha == 2:
         try:
             if int(input("Remover permanentemente? 1-Sim / 2-Nao: ")) == 1:
-                db.executar("DELETE FROM drones WHERE id = :i", {"i": did})
+                db.executar("DELETE FROM drones WHERE id = :i", {"i": id_drone})
                 print("[OK] Drone removido.")
             else:
                 print("Remocao cancelada.")
         except ValueError:
             print("Opcao invalida.")
-    elif opc == 3:
+    elif escolha == 3:
         print("Operacao cancelada.")
     else:
         print("Opcao invalida.")

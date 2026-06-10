@@ -20,11 +20,11 @@ def criar_relatorio():
     print("\n--- CRIAR RELATORIO / DASHBOARD ---")
 
     while True:
-        rid = input("ID do relatorio (ex: REL-001): ").strip().upper()
-        if rid == "":
+        id_relatorio = input("ID do relatorio (ex: REL-001): ").strip().upper()
+        if id_relatorio == "":
             print("ID nao pode ser vazio.")
             continue
-        if db.consultar("SELECT id FROM relatorios WHERE id = :i", {"i": rid}):
+        if db.consultar("SELECT id FROM relatorios WHERE id = :i", {"i": id_relatorio}):
             print("ID ja cadastrado.")
             continue
         break
@@ -39,10 +39,10 @@ def criar_relatorio():
     nome = input("Nome do relatorio: ").strip()
     print("Tipo: 1-Preditivo  2-Financeiro")
     while True:
-        t = input("Escolha: ").strip()
-        if t == "1":
+        escolha = input("Escolha: ").strip()
+        if escolha == "1":
             tipo = "preditivo"; break
-        elif t == "2":
+        elif escolha == "2":
             tipo = "financeiro"; break
         print("Escolha 1 ou 2.")
 
@@ -89,10 +89,10 @@ def criar_relatorio():
             num_ocorrencias, eficacia_media, economia_estimada, status)
         VALUES (:id, :par, :nome, :tipo, :noc, :ef, :ec, 'ativo')
     """, {
-        "id": rid, "par": id_parque, "nome": nome, "tipo": tipo,
+        "id": id_relatorio, "par": id_parque, "nome": nome, "tipo": tipo,
         "noc": num_oc, "ef": ef, "ec": economia
     })
-    print(f"\n[OK] Relatorio '{rid} - {nome}' criado!")
+    print(f"\n[OK] Relatorio '{id_relatorio} - {nome}' criado!")
     print(f"  Economia estimada: R$ {economia:,.2f}")
 
 
@@ -161,8 +161,8 @@ def visao_geral_financeira():
 
 # ---------------- UPDATE ----------------
 def atualizar_relatorio():
-    rid = input("ID do relatorio: ").strip().upper()
-    achou = db.consultar("SELECT * FROM relatorios WHERE id = :i", {"i": rid})
+    id_relatorio = input("ID do relatorio: ").strip().upper()
+    achou = db.consultar("SELECT * FROM relatorios WHERE id = :i", {"i": id_relatorio})
     if not achou:
         print("Relatorio nao encontrado.")
         return
@@ -176,7 +176,7 @@ def atualizar_relatorio():
     if opc == 1:
         novo = input("Novo nome: ").strip()
         db.executar("UPDATE relatorios SET nome = :n WHERE id = :i",
-                    {"n": novo, "i": rid})
+                    {"n": novo, "i": id_relatorio})
         print("[OK] Nome atualizado!")
     elif opc == 2:
         while True:
@@ -184,7 +184,7 @@ def atualizar_relatorio():
                 e = float(input("Nova eficacia (0-100): "))
                 if 0 <= e <= 100:
                     db.executar("UPDATE relatorios SET eficacia_media = :e WHERE id = :i",
-                                {"e": e, "i": rid})
+                                {"e": e, "i": id_relatorio})
                     print("[OK] Eficacia atualizada!")
                     return
                 print("Entre 0 e 100.")
@@ -196,7 +196,7 @@ def atualizar_relatorio():
                 n = int(input("Novo nº de ocorrencias: "))
                 if n >= 0:
                     db.executar("UPDATE relatorios SET num_ocorrencias = :n WHERE id = :i",
-                                {"n": n, "i": rid})
+                                {"n": n, "i": id_relatorio})
                     print("[OK] Atualizado!")
                     return
                 print("Deve ser >= 0.")
@@ -208,8 +208,8 @@ def atualizar_relatorio():
 
 # ---------------- DELETE ----------------
 def arquivar_ou_excluir_relatorio():
-    rid = input("ID do relatorio: ").strip().upper()
-    achou = db.consultar("SELECT * FROM relatorios WHERE id = :i", {"i": rid})
+    id_relatorio = input("ID do relatorio: ").strip().upper()
+    achou = db.consultar("SELECT * FROM relatorios WHERE id = :i", {"i": id_relatorio})
     if not achou:
         print("Relatorio nao encontrado.")
         return
@@ -223,12 +223,12 @@ def arquivar_ou_excluir_relatorio():
         print("Opcao invalida.")
         return
     if opc == 1:
-        db.executar("UPDATE relatorios SET status = 'arquivado' WHERE id = :i", {"i": rid})
+        db.executar("UPDATE relatorios SET status = 'arquivado' WHERE id = :i", {"i": id_relatorio})
         print("[OK] Relatorio arquivado.")
     elif opc == 2:
         try:
             if int(input("Excluir permanentemente? 1-Sim / 2-Nao: ")) == 1:
-                db.executar("DELETE FROM relatorios WHERE id = :i", {"i": rid})
+                db.executar("DELETE FROM relatorios WHERE id = :i", {"i": id_relatorio})
                 print("[OK] Relatorio excluido.")
             else:
                 print("Cancelado.")

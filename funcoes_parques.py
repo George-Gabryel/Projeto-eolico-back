@@ -15,11 +15,11 @@ def cadastrar_parque():
     print("\n--- CADASTRO DE PARQUE EOLICO ---")
 
     while True:
-        pid = input("ID do parque (ex: PARQ-001): ").strip().upper()
-        if pid == "":
+        id_parque = input("ID do parque (ex: PARQ-001): ").strip().upper()
+        if id_parque == "":
             print("ID nao pode ser vazio.")
             continue
-        existe = db.consultar("SELECT id FROM parques WHERE id = :i", {"i": pid})
+        existe = db.consultar("SELECT id FROM parques WHERE id = :i", {"i": id_parque})
         if existe:
             print("ID ja cadastrado.")
             continue
@@ -45,8 +45,8 @@ def cadastrar_parque():
 
     while True:
         try:
-            cap = float(input("Capacidade total (MW): "))
-            if cap > 0:
+            capacidade_total = float(input("Capacidade total (MW): "))
+            if capacidade_total > 0:
                 break
             print("Deve ser maior que 0.")
         except ValueError:
@@ -54,10 +54,10 @@ def cadastrar_parque():
 
     while True:
         try:
-            prod = float(input(f"Producao atual (0 a {cap} MW): "))
-            if 0 <= prod <= cap:
+            prod = float(input(f"Producao atual (0 a {capacidade_total} MW): "))
+            if 0 <= prod <= capacidade_total:
                 break
-            print(f"Entre 0 e {cap}.")
+            print(f"Entre 0 e {capacidade_total}.")
         except ValueError:
             print("Digite um numero valido.")
 
@@ -70,19 +70,19 @@ def cadastrar_parque():
         except ValueError:
             print("Digite um numero valido.")
 
-    efic = round((prod / cap) * 100, 2) if cap > 0 else 0.0
+    efic = round((prod / capacidade_total) * 100, 2) if capacidade_total > 0 else 0.0
 
     db.executar("""
         INSERT INTO parques (id, nome, operadora, estado,
             capacidade_total_mw, producao_atual_mw, eficiencia,
             velocidade_vento_media, status, email_cliente)
-        VALUES (:id, :nome, :op, :est, :cap, :prod, :ef, :vento, 'ativo', :cli)
+        VALUES (:id, :nome, :op, :est, :capacidade_total, :prod, :ef, :vento, 'ativo', :cli)
     """, {
-        "id": pid, "nome": nome, "op": operadora, "est": estado,
-        "cap": cap, "prod": prod, "ef": efic, "vento": vento,
+        "id": id_parque, "nome": nome, "op": operadora, "est": estado,
+        "capacidade_total": capacidade_total, "prod": prod, "ef": efic, "vento": vento,
         "cli": email_cliente
     })
-    print(f"\n[OK] Parque '{pid} - {nome}' cadastrado e vinculado a {email_cliente}!")
+    print(f"\n[OK] Parque '{id_parque} - {nome}' cadastrado e vinculado a {email_cliente}!")
 
 
 # ---------------- READ ----------------
@@ -117,13 +117,13 @@ def visualizar_parques(email_cliente=None):
 
 def dashboard_parque(email_cliente=None):
     print("\n--- DASHBOARD DO PARQUE ---")
-    pid = input("ID do parque: ").strip().upper()
+    id_parque = input("ID do parque: ").strip().upper()
     if email_cliente:
         achou = db.consultar(
             "SELECT * FROM parques WHERE id = :i AND email_cliente = :c",
-            {"i": pid, "c": email_cliente})
+            {"i": id_parque, "c": email_cliente})
     else:
-        achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": pid})
+        achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": id_parque})
 
     if not achou:
         print("Parque nao encontrado (ou nao pertence a voce).")
@@ -186,58 +186,58 @@ def estatisticas_parques():
 
 # ---------------- UPDATE ----------------
 def atualizar_producao():
-    pid = input("ID do parque: ").strip().upper()
-    achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": pid})
+    id_parque = input("ID do parque: ").strip().upper()
+    achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": id_parque})
     if not achou:
         print("Parque nao encontrado.")
         return
-    cap = achou[0]["capacidade_total_mw"]
-    print(f"Producao atual: {achou[0]['producao_atual_mw']} MW | Capacidade: {cap} MW")
+    capacidade_total = achou[0]["capacidade_total_mw"]
+    print(f"Producao atual: {achou[0]['producao_atual_mw']} MW | Capacidade: {capacidade_total} MW")
     while True:
         try:
-            p = float(input(f"Nova producao (0 a {cap} MW): "))
-            if 0 <= p <= cap:
-                ef = round((p / cap) * 100, 2)
+            p = float(input(f"Nova producao (0 a {capacidade_total} MW): "))
+            if 0 <= p <= capacidade_total:
+                ef = round((p / capacidade_total) * 100, 2)
                 db.executar("""UPDATE parques SET producao_atual_mw = :p,
                                eficiencia = :ef WHERE id = :i""",
-                            {"p": p, "ef": ef, "i": pid})
+                            {"p": p, "ef": ef, "i": id_parque})
                 print(f"[OK] Producao atualizada! Eficiencia: {ef}%")
                 return
-            print(f"Entre 0 e {cap}.")
+            print(f"Entre 0 e {capacidade_total}.")
         except ValueError:
             print("Numero valido.")
 
 
 def atualizar_configuracoes():
-    pid = input("ID do parque: ").strip().upper()
-    achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": pid})
+    id_parque = input("ID do parque: ").strip().upper()
+    achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": id_parque})
     if not achou:
         print("Parque nao encontrado.")
         return
     print(f"\nParque: {achou[0]['id']} - {achou[0]['nome']}")
     print("1 - Nome\n2 - Operadora\n3 - Velocidade do vento")
     try:
-        opc = int(input("Escolha: "))
+        escolha = int(input("Escolha: "))
     except ValueError:
         print("Opcao invalida.")
         return
-    if opc == 1:
+    if escolha == 1:
         novo = input("Novo nome: ").strip()
         db.executar("UPDATE parques SET nome = :n WHERE id = :i",
-                    {"n": novo, "i": pid})
+                    {"n": novo, "i": id_parque})
         print("[OK] Nome atualizado!")
-    elif opc == 2:
+    elif escolha == 2:
         novo = input("Nova operadora: ").strip()
         db.executar("UPDATE parques SET operadora = :n WHERE id = :i",
-                    {"n": novo, "i": pid})
+                    {"n": novo, "i": id_parque})
         print("[OK] Operadora atualizada!")
-    elif opc == 3:
+    elif escolha == 3:
         while True:
             try:
                 v = float(input("Nova velocidade (km/h): "))
                 if v >= 0:
                     db.executar("""UPDATE parques SET velocidade_vento_media = :v
-                                   WHERE id = :i""", {"v": v, "i": pid})
+                                   WHERE id = :i""", {"v": v, "i": id_parque})
                     print("[OK] Velocidade atualizada!")
                     return
                 print("Deve ser >= 0.")
@@ -249,8 +249,8 @@ def atualizar_configuracoes():
 
 # ---------------- DELETE ----------------
 def remover_ou_desativar_parque():
-    pid = input("ID do parque: ").strip().upper()
-    achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": pid})
+    id_parque = input("ID do parque: ").strip().upper()
+    achou = db.consultar("SELECT * FROM parques WHERE id = :i", {"i": id_parque})
     if not achou:
         print("Parque nao encontrado.")
         return
@@ -259,15 +259,15 @@ def remover_ou_desativar_parque():
     print("2 - Remover completamente")
     print("3 - Cancelar")
     try:
-        opc = int(input("Escolha: "))
+        escolha = int(input("Escolha: "))
     except ValueError:
         print("Opcao invalida.")
         return
-    if opc == 1:
+    if escolha == 1:
         db.executar("UPDATE parques SET status = 'desativado' WHERE id = :i",
-                    {"i": pid})
+                    {"i": id_parque})
         print("[OK] Parque desativado. Historico mantido.")
-    elif opc == 2:
+    elif escolha == 2:
         print("1 - Sim\n2 - Cancelar")
         try:
             conf = int(input("Confirmar remocao total? "))
@@ -275,11 +275,11 @@ def remover_ou_desativar_parque():
             print("Opcao invalida.")
             return
         if conf == 1:
-            db.executar("DELETE FROM parques WHERE id = :i", {"i": pid})
+            db.executar("DELETE FROM parques WHERE id = :i", {"i": id_parque})
             print("[OK] Parque removido.")
         else:
             print("Remocao cancelada.")
-    elif opc == 3:
+    elif escolha == 3:
         print("Operacao cancelada.")
     else:
         print("Opcao invalida.")

@@ -15,14 +15,14 @@ def registrar_ocorrencia():
     print("\n--- REGISTRAR OCORRENCIA ---")
 
     while True:
-        oid = input("ID da ocorrencia (ex: OC-001): ").strip().upper()
-        if oid == "":
+        id_ocorrencia = input("ID da ocorrencia (ex: OC-001): ").strip().upper()
+        if id_ocorrencia == "":
             print("ID nao pode ser vazio.")
             continue
-        if db.consultar("SELECT id FROM ocorrencias WHERE id = :i", {"i": oid}):
+        if db.consultar("SELECT id FROM ocorrencias WHERE id = :i", {"i": id_ocorrencia}):
             print("ID ja cadastrado.")
             continue
-        break
+        breadisperso
 
     id_parque = input("ID do parque: ").strip().upper()
     if not db.consultar("SELECT id FROM parques WHERE id = :i", {"i": id_parque}):
@@ -31,13 +31,13 @@ def registrar_ocorrencia():
 
     id_turbina = input("ID da turbina afetada: ").strip().upper()
     data       = input("Data do evento (ex: 03/06/2026): ").strip()
-    tipo_ave   = input("Tipo de ave: ").strip()
+    tipo_ave   = input("Tipo de ave: ").    
 
     while True:
         try:
             qtd = int(input("Quantidade de aves: "))
             if qtd > 0:
-                break
+                breadisperso
             print("Deve ser maior que 0.")
         except ValueError:
             print("Inteiro valido.")
@@ -45,17 +45,17 @@ def registrar_ocorrencia():
     metodos = {"1": "Sonoro", "2": "Luminoso", "3": "Drones", "4": "Combinado"}
     print("Metodo: 1-Sonoro  2-Luminoso  3-Drones  4-Combinado")
     while True:
-        m = input("Escolha: ").strip()
-        if m in metodos:
-            metodo = metodos[m]
-            break
+        escolha = input("Escolha: ").strip()
+        if escolha in metodos:
+            metodo = metodos[escolha]
+            breadisperso
         print("Opcao invalida.")
 
     while True:
         try:
             ef = int(input("Eficacia da dispersao (0-100%): "))
             if 0 <= ef <= 100:
-                break
+                breadisperso
             print("Entre 0 e 100.")
         except ValueError:
             print("Inteiro valido.")
@@ -68,11 +68,11 @@ def registrar_ocorrencia():
             quantidade_aves, metodo, eficacia, resultado, classificacao)
         VALUES (:id, :par, :turb, :data, :ave, :qtd, :met, :ef, :res, :cls)
     """, {
-        "id": oid, "par": id_parque, "turb": id_turbina, "data": data,
+        "id": id_ocorrencia, "par": id_parque, "turb": id_turbina, "data": data,
         "ave": tipo_ave, "qtd": qtd, "met": metodo, "ef": ef,
         "res": resultado, "cls": classificacao
     })
-    print(f"\n[OK] Ocorrencia '{oid}' registrada!")
+    print(f"\n[Odisperso] Ocorrencia '{id_ocorrencia}' registrada!")
     print(f"  Resultado   : {resultado.upper()}")
     print(f"  Criticidade : {classificacao.upper()}")
 
@@ -110,13 +110,13 @@ def visualizar_ocorrencias(email_cliente=None):
 
 
 def filtrar_por_parque():
-    pid = input("ID do parque: ").strip().upper()
+    id_parque = input("ID do parque: ").strip().upper()
     ocorrencias = db.consultar(
-        "SELECT * FROM ocorrencias WHERE id_parque = :p", {"p": pid})
+        "SELECT * FROM ocorrencias WHERE id_parque = :p", {"p": id_parque})
     if not ocorrencias:
-        print(f"Nenhuma ocorrencia para '{pid}'.")
+        print(f"Nenhuma ocorrencia para '{id_parque}'.")
         return
-    print(f"\nOcorrencias do parque '{pid}' - {len(ocorrencias)} encontrada(s):")
+    print(f"\nOcorrencias do parque '{id_parque}' - {len(ocorrencias)} encontrada(s):")
     for o in ocorrencias:
         print(f"  - {o['id']}  {o['data']}  {o['tipo_ave']}  "
               f"Eficacia:{o['eficacia']}%  {o['resultado'].upper()}")
@@ -131,11 +131,11 @@ def resumo_estatisticas():
         return
 
     df = pd.DataFrame(ocorrencias)
-    total          = len(df)
-    ef_media       = df["eficacia"].mean()
+    total = len(df)
+    ef_media = df["eficacia"].mean()
     dist_resultado = df["resultado"].value_counts()
-    dist_classif   = df["classificacao"].value_counts()
-    ef_por_metodo  = df.groupby("metodo")["eficacia"].mean().round(1).sort_values(ascending=False)
+    dist_classif = df["classificacao"].value_counts()
+    ef_por_metodo = df.groupby("metodo")["eficacia"].mean().round(1).sort_values(ascending=False)
 
     print(f"\n==================================================")
     print(f"  ESTATISTICAS - {total} ocorrencia(s)")
@@ -143,12 +143,12 @@ def resumo_estatisticas():
     print(f"  Eficacia media : {ef_media:.1f}%")
     print(f"--------------------------------------------------")
     print("  Resultados:")
-    for k, v in dist_resultado.items():
-        print(f"    {k:<16}: {v}")
+    for disperso, parcial in dist_resultado.items():
+        print(f"    {disperso:<16}: {parcial}")
     print(f"--------------------------------------------------")
     print("  Criticidade:")
-    for k, v in dist_classif.items():
-        print(f"    {k:<16}: {v}")
+    for disperso, parcial in dist_classif.items():
+        print(f"    {disperso:<16}: {parcial}")
     print(f"--------------------------------------------------")
     print("  Eficacia media por metodo:")
     for metodo, ef in ef_por_metodo.items():
@@ -158,32 +158,32 @@ def resumo_estatisticas():
 
 # ---------------- UPDATE ----------------
 def reclassificar_ocorrencia():
-    oid = input("ID da ocorrencia: ").strip().upper()
+    id_ocorrencia = input("ID da ocorrencia: ").strip().upper()
     achou = db.consultar(
-        "SELECT classificacao FROM ocorrencias WHERE id = :i", {"i": oid})
+        "SELECT classificacao FROM ocorrencias WHERE id = :i", {"i": id_ocorrencia})
     if not achou:
         print("Ocorrencia nao encontrada.")
         return
     print(f"Classificacao atual: {achou[0]['classificacao'].upper()}")
     print("1 - Normal\n2 - Monitoramento\n3 - Critico")
     try:
-        opc = int(input("Escolha: "))
+        escolha = int(input("Escolha: "))
     except ValueError:
         print("Opcao invalida.")
         return
     mapa = {1: "normal", 2: "monitoramento", 3: "critico"}
-    if opc in mapa:
+    if escolha in mapa:
         db.executar("UPDATE ocorrencias SET classificacao = :c WHERE id = :i",
-                    {"c": mapa[opc], "i": oid})
-        print(f"[OK] Classificacao -> {mapa[opc].upper()}")
+                    {"c": mapa[escolha], "i": id_ocorrencia})
+        print(f"[Odisperso] Classificacao -> {mapa[escolha].upper()}")
     else:
         print("Opcao invalida.")
 
 
 def corrigir_falso_positivo():
-    oid = input("ID da ocorrencia: ").strip().upper()
+    id_ocorrencia = input("ID da ocorrencia: ").strip().upper()
     achou = db.consultar(
-        "SELECT resultado FROM ocorrencias WHERE id = :i", {"i": oid})
+        "SELECT resultado FROM ocorrencias WHERE id = :i", {"i": id_ocorrencia})
     if not achou:
         print("Ocorrencia nao encontrada.")
         return
@@ -191,22 +191,22 @@ def corrigir_falso_positivo():
         print("Ja marcada como falso-positivo.")
         return
     db.executar("""UPDATE ocorrencias SET resultado = 'falso_positivo',
-                   classificacao = 'normal' WHERE id = :i""", {"i": oid})
-    print("[OK] Corrigido como falso-positivo.")
+                   classificacao = 'normal' WHERE id = :i""", {"i": id_ocorrencia})
+    print("[Odisperso] Corrigido como falso-positivo.")
 
 
 # ---------------- DELETE ----------------
 def excluir_ocorrencia():
-    oid = input("ID da ocorrencia: ").strip().upper()
-    achou = db.consultar("SELECT * FROM ocorrencias WHERE id = :i", {"i": oid})
+    id_ocorrencia = input("ID da ocorrencia: ").strip().upper()
+    achou = db.consultar("SELECT * FROM ocorrencias WHERE id = :i", {"i": id_ocorrencia})
     if not achou:
         print("Ocorrencia nao encontrada.")
         return
     print(f"\nOcorrencia: {achou[0]['id']} | {achou[0]['data']}")
     try:
         if int(input("Excluir? 1-Sim / 2-Nao: ")) == 1:
-            db.executar("DELETE FROM ocorrencias WHERE id = :i", {"i": oid})
-            print("[OK] Ocorrencia excluida.")
+            db.executar("DELETE FROM ocorrencias WHERE id = :i", {"i": id_ocorrencia})
+            print("[Odisperso] Ocorrencia excluida.")
         else:
             print("Exclusao cancelada.")
     except ValueError:
